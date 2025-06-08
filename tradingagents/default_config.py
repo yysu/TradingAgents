@@ -10,10 +10,19 @@ DEFAULT_CONFIG = {
     # LLM settings
     "deep_think_llm": "o4-mini",
     "quick_think_llm": "gpt-4o-mini",
+    # Language settings
+    "language": "zh-TW",  # Options: "en", "zh-TW", "zh-CN"
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
     "max_recur_limit": 100,
     # Tool settings
     "online_tools": True,
+}
+
+# Language name mappings
+LANGUAGE_NAMES = {
+    "en": "English",
+    "zh-TW": "Traditional Chinese",
+    "zh-CN": "Simplified Chinese"
 }

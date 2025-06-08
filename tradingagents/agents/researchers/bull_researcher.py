@@ -1,6 +1,8 @@
 from langchain_core.messages import AIMessage
 import time
 import json
+from tradingagents.dataflows.config import get_config
+from tradingagents.default_config import LANGUAGE_NAMES
 
 
 def create_bull_researcher(llm, memory):
@@ -22,6 +24,9 @@ def create_bull_researcher(llm, memory):
         for i, rec in enumerate(past_memories, 1):
             past_memory_str += rec["recommendation"] + "\n\n"
 
+        config = get_config()
+        language = config.get("language", "en")
+        
         prompt = f"""You are a Bull Analyst advocating for investing in the stock. Your task is to build a strong, evidence-based case emphasizing growth potential, competitive advantages, and positive market indicators. Leverage the provided research and data to address concerns and counter bearish arguments effectively.
 
 Key points to focus on:
@@ -40,10 +45,12 @@ Conversation history of the debate: {history}
 Last bear argument: {current_response}
 Reflections from similar situations and lessons learned: {past_memory_str}
 Use this information to deliver a compelling bull argument, refute the bear's concerns, and engage in a dynamic debate that demonstrates the strengths of the bull position. You must also address reflections and learn from lessons and mistakes you made in the past.
-"""
+
+Please use {LANGUAGE_NAMES[language]} to reply to me."""
 
         response = llm.invoke(prompt)
 
+        # Ensure the role label is always in English for consistency
         argument = f"Bull Analyst: {response.content}"
 
         new_investment_debate_state = {

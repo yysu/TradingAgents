@@ -1,6 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
+from tradingagents.dataflows.config import get_config
+from tradingagents.default_config import LANGUAGE_NAMES
 
 
 def create_fundamentals_analyst(llm, toolkit):
@@ -20,9 +22,12 @@ def create_fundamentals_analyst(llm, toolkit):
                 toolkit.get_simfin_income_stmt,
             ]
 
+        config = get_config()
+        language = config.get("language", "en")
+
         system_message = (
             "You are a researcher tasked with analyzing fundamental information over the past week about a company. Please write a comprehensive report of the company's fundamental information such as financial documents, company profile, basic company financials, company financial history, insider sentiment and insider transactions to gain a full view of the company's fundamental information to inform traders. Make sure to include as much detail as possible. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
-            + " Make sure to append a Makrdown table at the end of the report to organize key points in the report, organized and easy to read.",
+            + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
         )
 
         prompt = ChatPromptTemplate.from_messages(
@@ -36,14 +41,16 @@ def create_fundamentals_analyst(llm, toolkit):
                     " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
                     " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
                     " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. The company we want to look at is {ticker}",
+                    f"\n\nPlease use {LANGUAGE_NAMES[language]} to reply to me."
+                    "\nFor your reference, the current date is {current_date}. The company we want to look at is {ticker}",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
         )
 
         prompt = prompt.partial(system_message=system_message)
-        prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
+        prompt = prompt.partial(tool_names=", ".join(
+            [tool.name for tool in tools]))
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(ticker=ticker)
 
